@@ -1,0 +1,10 @@
+services:
+  driveguard-vision:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_HOST: 0.0.0.0
+      PORT: 5000

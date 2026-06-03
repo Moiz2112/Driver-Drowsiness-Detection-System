@@ -33,6 +33,26 @@ py -3.11 -m venv .venv
 
 Then open `http://127.0.0.1:5000` in your browser and click `Start Camera Detection`.
 
+## Docker
+For the current web app runtime, Docker uses the live-monitor dependencies in `requirements-web.txt`.
+
+From `Driver-Drowsiness-Detection`:
+
+```powershell
+docker build -t driveguard-vision .
+docker run -p 5000:5000 driveguard-vision
+```
+
+Or with Compose:
+
+```powershell
+docker compose up --build
+```
+
+Then open `http://127.0.0.1:5000`.
+
+Note: webcam access from Docker depends on your host OS and Docker setup. The container is ready for the web app, but passing a physical camera through Docker on Windows can need extra host-specific configuration.
+
 ## Other Options
 ### Transfer Learning
 1. Download the dataset from `Transfer_learning/get_dataset.txt`.
