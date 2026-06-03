@@ -1,7 +1,7 @@
 """
 Train a stronger eye-state classifier for open/closed detection.
-This version uses the repository train/test split and a Random Forest model,
-which performs much better than the previous flattened-pixel boosting baseline.
+This version uses the repository train/test split, light augmentation, and
+histogram-equalized preprocessing to make closed-eye detection more stable.
 """
 
 from pathlib import Path
@@ -9,7 +9,7 @@ from pathlib import Path
 import cv2
 import joblib
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.preprocessing import LabelEncoder
 
@@ -20,7 +20,23 @@ MODEL_DIR = BASE_DIR / "models"
 IMAGE_SIZE = (24, 24)
 
 
-def load_split(split_name: str) -> tuple[np.ndarray, np.ndarray]:
+def preprocess(image: np.ndarray) -> np.ndarray:
+    image = cv2.resize(image, IMAGE_SIZE)
+    image = cv2.equalizeHist(image)
+    return image
+
+
+def augment(image: np.ndarray) -> list[np.ndarray]:
+    variants = [image]
+    variants.append(cv2.flip(image, 1))
+    variants.append(cv2.GaussianBlur(image, (3, 3), 0))
+    brighter = cv2.convertScaleAbs(image, alpha=1.08, beta=8)
+    darker = cv2.convertScaleAbs(image, alpha=0.92, beta=-8)
+    variants.extend([brighter, darker])
+    return variants
+
+
+def load_split(split_name: str, *, do_augment: bool) -> tuple[np.ndarray, np.ndarray]:
     split_dir = DATASET_DIR / split_name
     features: list[np.ndarray] = []
     labels: list[str] = []
@@ -41,25 +57,27 @@ def load_split(split_name: str) -> tuple[np.ndarray, np.ndarray]:
             if image is None:
                 continue
 
-            image = cv2.resize(image, IMAGE_SIZE)
-            features.append((image.flatten() / 255.0).astype("float32"))
-            labels.append(class_name)
+            processed = preprocess(image)
+            variants = augment(processed) if do_augment else [processed]
+            for variant in variants:
+                features.append((variant.flatten() / 255.0).astype("float32"))
+                labels.append(class_name)
             image_count += 1
 
-        print(f"Loaded {image_count} images from {split_name}/{class_name}")
+        print(f"Loaded {image_count} source images from {split_name}/{class_name}")
 
     return np.array(features), np.array(labels)
 
 
 def main() -> None:
     print("=" * 60)
-    print("Random Forest Eye-State Training")
+    print("Augmented Extra Trees Eye-State Training")
     print("=" * 60)
 
     np.random.seed(42)
 
-    X_train, y_train = load_split("train")
-    X_test, y_test = load_split("test")
+    X_train, y_train = load_split("train", do_augment=True)
+    X_test, y_test = load_split("test", do_augment=False)
 
     print(f"\nTraining samples: {X_train.shape}")
     print(f"Test samples: {X_test.shape}")
@@ -68,16 +86,20 @@ def main() -> None:
     y_train_encoded = label_encoder.fit_transform(y_train)
     y_test_encoded = label_encoder.transform(y_test)
 
-    print(f"Label mapping: {dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))}")
+    print(
+        f"Label mapping: "
+        f"{dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))}"
+    )
 
-    model = RandomForestClassifier(
-        n_estimators=400,
+    model = ExtraTreesClassifier(
+        n_estimators=700,
         random_state=42,
         n_jobs=-1,
         class_weight="balanced",
+        min_samples_leaf=1,
     )
 
-    print("\nTraining Random Forest classifier...")
+    print("\nTraining Extra Trees classifier...")
     model.fit(X_train, y_train_encoded)
 
     train_predictions = model.predict(X_train)
@@ -89,7 +111,14 @@ def main() -> None:
     print(f"\nTraining Accuracy: {train_accuracy * 100:.2f}%")
     print(f"Test Accuracy: {test_accuracy * 100:.2f}%")
     print("\nClassification Report:")
-    print(classification_report(y_test_encoded, test_predictions, target_names=label_encoder.classes_, digits=4))
+    print(
+        classification_report(
+            y_test_encoded,
+            test_predictions,
+            target_names=label_encoder.classes_,
+            digits=4,
+        )
+    )
 
     MODEL_DIR.mkdir(exist_ok=True)
     model_path = MODEL_DIR / "cnnCat2.joblib"

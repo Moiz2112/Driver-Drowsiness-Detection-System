@@ -12,6 +12,7 @@ const leftEyeValue = document.getElementById("leftEyeValue");
 const rightEyeValue = document.getElementById("rightEyeValue");
 const eyesDetectedValue = document.getElementById("eyesDetectedValue");
 const faceDetectedValue = document.getElementById("faceDetectedValue");
+const modeButtons = Array.from(document.querySelectorAll(".mode-btn"));
 
 let pollHandle = null;
 let audioContext = null;
@@ -80,6 +81,10 @@ function renderState(state) {
     rightEyeValue.textContent = state.right_eye || "Not detected";
     eyesDetectedValue.textContent = state.eyes_detected ?? 0;
     faceDetectedValue.textContent = state.face_detected ? "Yes" : "No";
+    const activeMode = state.mode || "normal";
+    modeButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.mode === activeMode);
+    });
 
     if (state.alarm) {
         alarmValue.textContent = "Alarm On";
@@ -93,6 +98,17 @@ function renderState(state) {
         alarmValue.textContent = "Standby";
         alarmCard.classList.remove("alarm");
         stopAlarm();
+    }
+}
+
+async function setMode(mode) {
+    try {
+        const response = await fetch(`/mode/${mode}`, { method: "POST" });
+        const result = await response.json();
+        renderState(result);
+        setFeedback(result.message, !response.ok || !result.ok);
+    } catch (error) {
+        setFeedback("Could not change sensitivity mode.", true);
     }
 }
 
@@ -168,6 +184,12 @@ stopButton.addEventListener("click", async () => {
         setFeedback("Could not stop the camera cleanly.", true);
         stopButton.disabled = false;
     }
+});
+
+modeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+        setMode(button.dataset.mode);
+    });
 });
 
 refreshStatus().catch(() => {
