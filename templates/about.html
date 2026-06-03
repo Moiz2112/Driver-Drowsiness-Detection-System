@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About DriveGuard Vision</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="page-shell">
+        <div class="ambient ambient-one"></div>
+        <div class="ambient ambient-two"></div>
+
+        <nav class="site-nav reveal">
+            <a class="brand" href="/">
+                <span class="brand-mark">DG</span>
+                <span class="brand-copy">
+                    <strong>DriveGuard Vision</strong>
+                    <small>Drowsiness Monitoring System</small>
+                </span>
+            </a>
+
+            <div class="nav-links">
+                <a href="/">Live Monitor</a>
+                <a href="/about" class="active">About</a>
+            </div>
+        </nav>
+
+        <header class="hero hero-single">
+            <div class="hero-copy reveal">
+                <p class="eyebrow">About The System</p>
+                <h1>How DriveGuard Vision Works</h1>
+                <p class="lede">
+                    DriveGuard Vision is a real-time driver monitoring interface that watches the live camera feed,
+                    estimates whether the eyes are open or closed, tracks fatigue signals over time, and triggers
+                    an alarm when persistent closed-eye behavior suggests drowsiness.
+                </p>
+            </div>
+        </header>
+
+        <main class="dashboard">
+            <section class="feature-grid reveal delay-one">
+                <article class="feature-card">
+                    <h3>Purpose</h3>
+                    <p>This system is designed to support driver safety by identifying signs of drowsiness before they become dangerous.</p>
+                    <p>It focuses on live monitoring rather than manual image upload so the interface stays practical during real-time use.</p>
+                </article>
+
+                <article class="feature-card">
+                    <h3>How Detection Works</h3>
+                    <p>The app uses face and eye localization on the webcam stream, then runs a trained eye-state model to classify each eye as open or closed.</p>
+                    <p>Those per-eye results are combined into a fatigue score and live alert state.</p>
+                </article>
+
+                <article class="feature-card">
+                    <h3>Alarm Logic</h3>
+                    <p>The alarm does not fire on a normal blink. It waits for persistent closed-eye frames so short blinks are less likely to cause false alerts.</p>
+                    <p>Once the eyes are detected open again, the alarm stops and the system returns to monitoring mode.</p>
+                </article>
+            </section>
+
+            <section class="feature-grid reveal delay-two">
+                <article class="feature-card">
+                    <h3>What You See Live</h3>
+                    <p>The homepage shows the annotated camera feed, left-eye and right-eye status, fatigue level, score, and alarm state.</p>
+                </article>
+
+                <article class="feature-card">
+                    <h3>Current Limitations</h3>
+                    <p>Accuracy still depends on lighting, face angle, camera quality, and whether the eyes are clearly visible in the frame.</p>
+                </article>
+
+                <article class="feature-card">
+                    <h3>Best Use</h3>
+                    <p>For the most reliable results, use the system with a front-facing camera, stable lighting, and a clear view of the face.</p>
+                </article>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

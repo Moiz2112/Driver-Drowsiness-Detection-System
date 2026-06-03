@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriveGuard Vision</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="page-shell">
+        <div class="ambient ambient-one"></div>
+        <div class="ambient ambient-two"></div>
+
+        <nav class="site-nav reveal">
+            <a class="brand" href="/">
+                <span class="brand-mark">DG</span>
+                <span class="brand-copy">
+                    <strong>DriveGuard Vision</strong>
+                    <small>Drowsiness Monitoring System</small>
+                </span>
+            </a>
+
+            <div class="nav-links">
+                <a href="/" class="active">Live Monitor</a>
+                <a href="/about">About</a>
+            </div>
+        </nav>
+
+        <header class="hero">
+            <div class="hero-copy reveal">
+                <p class="eyebrow">Driver Safety Intelligence</p>
+                <h1>DriveGuard Vision</h1>
+                <p class="lede">
+                    Live camera monitoring for eye-open and eye-closed detection with fatigue tracking and an automatic alarm when eyes remain closed.
+                </p>
+
+                <div class="hero-actions">
+                    <button id="startButton" class="primary-btn">Start Camera Detection</button>
+                    <button id="stopButton" class="ghost-btn" disabled>Stop</button>
+                </div>
+
+                <div id="feedback" class="feedback">Ready when you are.</div>
+            </div>
+
+            <aside class="hero-panel reveal delay-one">
+                <div class="metric-card">
+                    <span class="metric-label">Current Status</span>
+                    <strong id="statusValue">Idle</strong>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Fatigue Level</span>
+                    <strong id="fatigueValue">Standby</strong>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Drowsiness Score</span>
+                    <strong id="scoreValue">0</strong>
+                </div>
+                <div class="metric-card pulse-card" id="alarmCard">
+                    <span class="metric-label">Alarm State</span>
+                    <strong id="alarmValue">Standby</strong>
+                </div>
+            </aside>
+        </header>
+
+        <main class="dashboard">
+            <section class="viewer reveal delay-two">
+                <div class="viewer-topline">
+                    <span>Live Detection Feed</span>
+                    <span class="badge">Camera Only Mode</span>
+                </div>
+                <div class="video-frame">
+                    <div class="scanline"></div>
+                    <img id="videoFeed" alt="Live detection stream will appear here">
+                    <div class="video-placeholder" id="videoPlaceholder">
+                        <h2>Camera standby</h2>
+                        <p>Start the detector to stream the annotated webcam feed here.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="feature-grid reveal delay-three">
+                <article class="feature-card">
+                    <h3>Live eye breakdown</h3>
+                    <div class="detail-row">
+                        <span>Left Eye</span>
+                        <strong id="leftEyeValue">Not detected</strong>
+                    </div>
+                    <div class="detail-row">
+                        <span>Right Eye</span>
+                        <strong id="rightEyeValue">Not detected</strong>
+                    </div>
+                    <div class="detail-row">
+                        <span>Eyes Detected</span>
+                        <strong id="eyesDetectedValue">0</strong>
+                    </div>
+                    <div class="detail-row">
+                        <span>Face Detected</span>
+                        <strong id="faceDetectedValue">No</strong>
+                    </div>
+                </article>
+
+                <article class="feature-card">
+                    <h3>Alarm behavior</h3>
+                    <p>The alarm starts only after persistent closed-eye frames so normal blinking does not immediately trigger it.</p>
+                    <p>As soon as both eyes are seen open again, the alarm stops and the fatigue score drops back down.</p>
+                </article>
+
+                <article class="feature-card">
+                    <h3>Focus of this version</h3>
+                    <p>This page now keeps only the live camera flow, which is the more reliable path for this project.</p>
+                    <p>No image upload section remains, so the interface stays focused on real-time monitoring.</p>
+                </article>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
